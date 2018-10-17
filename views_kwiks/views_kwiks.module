@@ -1,0 +1,89 @@
+<?php
+
+/**
+ * Implements hook_views_api().
+ */
+function views_kwiks_views_api() {
+  return array(
+    'api' => 2.0,
+  );
+}
+
+/**
+ * Views Kwiks: preprocess function.
+ */
+function template_preprocess_views_kwiks(&$vars) {
+  $vars['options']['defaultKwick'] = filter_xss_admin($vars['options']['defaultKwick']);
+  $vars['options']['activeClass'] = filter_xss_admin($vars['options']['activeClass']);
+  $vars['options']['event'] = filter_xss_admin($vars['options']['event']);
+  $vars['options']['eventClose'] = filter_xss_admin($vars['options']['eventClose']);
+  $vars['options']['spacing'] = filter_xss_admin($vars['options']['spacing']);
+  $vars['options']['duration'] = filter_xss_admin($vars['options']['duration']);
+  $vars['options']['easing'] = filter_xss_admin($vars['options']['easing']);
+  $vars['options']['max'] = filter_xss_admin($vars['options']['max']);
+  $vars['options']['min'] = filter_xss_admin($vars['options']['min']);
+  $vars['options']['customcsspath'] = filter_xss_admin($vars['options']['customcsspath']);
+
+  $kwik_module_path = drupal_get_path('module', 'views_kwiks');
+  drupal_add_css($kwik_module_path .'/kwiks/css/kwicks.css'); // default kwiks css. IMPORTANT!!! Include the stylesheet *BEFORE* the JavaScript (necessary for Safari 3.1.1)
+  if($vars['options']['customcss']){
+    drupal_add_css($kwik_module_path .'/'.$vars['options']['customcsspath'].'');
+  }
+  drupal_add_js($kwik_module_path .'/kwiks/js/jquery.easing.1.3.js');
+  drupal_add_js($kwik_module_path .'/kwiks/js/jquery.kwicks.min.js'); 
+
+  $js_options = array( 
+    'isVertical' => $vars['options']['isVertical'] ? true : false,
+    'sticky' => $vars['options']['sticky'] ? true : false,
+    'defaultKwick' => (int)$vars['options']['defaultKwick'],
+    'activeClass' => $vars['options']['activeClass'],
+    'event' => $vars['options']['event'],
+    'eventClose' => $vars['options']['eventClose'],
+    'spacing' => (int)$vars['options']['spacing'],
+    'duration' => (int)$vars['options']['duration'],
+    'easing' => $vars['options']['easing'],
+    'max' => (int)$vars['options']['max'],
+    'min' => (int)$vars['options']['min'],    
+  );
+
+  drupal_add_js(array("view_{$vars['view']->name}" => $js_options), 'setting');
+
+  $event_init = $vars['options']['init'] ? file_get_contents($kwik_module_path . '/event_init.js') : $vars['options']['init'];
+
+  $event_expanding = $vars['options']['expanding'] ? file_get_contents($kwik_module_path . '/event_expanding.js') : $vars['options']['expanding'];
+
+  $event_collapsing = $vars['options']['collapsing'] ? file_get_contents($kwik_module_path . '/event_collapsing.js') : $vars['options']['collapsing'];
+
+  $event_completed = $vars['options']['completed'] ? file_get_contents($kwik_module_path . '/event_completed.js') : $vars['options']['completed'];
+
+  // Drupal.behaviors.views_kwiks is executed on document ready every page change, needed for ajax pager
+  if (Drupal.jsEnabled) {
+    drupal_add_js('
+    (function($) {
+      function kwiks_init() {
+	var kwiks_settings_obj = Drupal.settings.view_'. $vars['view']->name.';	
+	$(\'#kwiks-'. $vars['view']->name .'\').kwicks({ 
+	  isVertical   : kwiks_settings_obj.isVertical ,
+	  sticky       : kwiks_settings_obj.sticky,        
+	  defaultKwick : kwiks_settings_obj.defaultKwick,            
+	  activeClass  : kwiks_settings_obj.activeClass,     
+	  event        : kwiks_settings_obj.event, 
+	  eventClose   : kwiks_settings_obj.eventClose, 
+	  spacing      : kwiks_settings_obj.spacing,            
+	  duration     : kwiks_settings_obj.duration,          
+	  easing       : kwiks_settings_obj.easing,      
+	  max          : kwiks_settings_obj.max,         
+	  min          : kwiks_settings_obj.min,         
+	  init         : ' . $event_init . ',
+	  expanding    : ' . $event_expanding . ',         
+	  collapsing   : ' . $event_collapsing . ',         
+	  completed    : ' . $event_completed . '    
+	});
+      }
+      Drupal.behaviors.views_kwiks = function (context) {
+	kwiks_init();	
+      };
+    })(jQuery);
+    ', 'inline', 'footer');
+  }
+}

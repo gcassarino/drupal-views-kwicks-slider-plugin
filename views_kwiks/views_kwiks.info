@@ -1,0 +1,5 @@
+name = Views Kwiks
+description = Style plugin that displays results using the Mottie Kwiks plugin for jQuery. Gianluca Cassarino gcassarino@gmail.com
+core = 6.x
+dependencies[] = views
+package = Views
