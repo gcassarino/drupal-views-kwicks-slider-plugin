@@ -1,7 +1,7 @@
 # drupal-views-kwicks-slider-plugin
 Drupal 6 Views Style plugin that displays results using the Kwicks https://github.com/Mottie/Kwicks plugin for jQuery.
 
-[DEMO](http://www.quovadiscom.com/content/drupal-views-kwicks-slider-plugin)
+[DEMO](https://www.quovadiscom.com/old-site/www.quovadiscom.com/content/drupal-views-kwicks-slider-plugin/index.html)
 
 A kwicks slider for drupal 6. Kwicks for JQuery is a plugin created by [Jeremy Martin](https://github.com/jmar777) https://github.com/jmar777/kwicks
 
